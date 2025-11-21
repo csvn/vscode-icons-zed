@@ -1,0 +1,35 @@
+# Publishes a released tag to Zed Extension Registry
+
+name: Publish
+
+env:
+  NODE_VERSION: 24.11.1
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: huacnlee/zed-extension-action@v2
+        # TODO: Enable
+        if: false
+        with:
+          extension-name: vscode-icons
+          # TODO: Update with the real forked Zed Extensions repository
+          push-to: vscode-icons/zed-extensions
+        env:
+          # TODO: Add this secret to the repository
+          # "the personal access token should have "repo" & "workflow" scopes"
+          COMMITTER_TOKEN: ${{ secrets.COMMITTER_TOKEN }}
+
+      - name: Release
+        uses: softprops/action-gh-release@v2
+        with:
+          body: |
+            For the full list of changes, see [`vscode-icons` release notes][1].
+            
+            [1]: https://github.com/vscode-icons/vscode-icons/releases/tag/${{ github.ref_name }}
