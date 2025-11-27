@@ -1,0 +1,64 @@
+# Updates the `/icons` and Zed manifest from vscode-icons build Artifact,
+# and creates a new release with the given version tag.
+
+name: Tag Release Commit
+
+env:
+  NODE_VERSION: 24.11.1
+
+on:
+  workflow_call:
+    inputs:
+      version:
+        description: The vscode-icons version tag to publish, e.g. 'v4.3.2'
+        required: true
+        type: string
+      artifact-id:
+        description: The ID of the Artifact to download
+        required: true
+        type: string
+      run-id:
+        description: The ID of the Workflow Run that produced the Artifact
+        required: true
+        type: string
+    secrets:
+      GH_TOKEN:
+        description: GitHub token to use for Artifact download authentication
+        required: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Cloning repository
+        uses: actions/checkout@v6
+        
+      - name: DEBUG LOG
+        run: ls -la
+        
+      - name: Clear existing icons/manifest
+        run: |
+          rm -rf ./icon_themes
+          rm -rf ./icons
+        
+      - name: DEBUG LOG
+        run: ls -la
+
+      - name: Download vscode-icons artifact
+        uses: actions/download-artifact@v6
+        with:
+          artifact-ids: ${{ inputs.artifact-id }}
+          run-id: ${{ inputs.run-id }}
+          github-token: ${{ secrets.GH_TOKEN }}
+          # TODO: Real repository
+          # repository: vscode-icons/vscode-icons
+          repository: csvn/vscode-icons
+        
+      - name: DEBUG LOG
+        run: ls -la
+        
+      - name: Version
+        run: echo ${{ inputs.version }}
+        
+      - name: Git diff
+        run: git diff --stat HEAD^ HEAD
